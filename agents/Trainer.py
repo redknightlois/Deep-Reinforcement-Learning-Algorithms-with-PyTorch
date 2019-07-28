@@ -81,7 +81,8 @@ class Trainer(object):
                 agent_rolling_score_results = [results[1] for results in  self.results[agent_name]]
                 self.visualise_overall_agent_results(agent_rolling_score_results, agent_name, show_mean_and_std_range=True)
         if self.config.file_to_save_data_results: self.save_obj(self.results, self.config.file_to_save_data_results)
-        if self.config.file_to_save_results_graph: plt.savefig(self.config.file_to_save_results_graph, bbox_inches="tight")
+        if self.config.file_to_save_results_graph:
+            plt.savefig(self.config.file_to_save_results_graph, dpi=200, bbox_inches="tight")
         plt.show()
         return self.results
 
@@ -286,6 +287,7 @@ class Trainer(object):
                                                title=plot_titles[ax_ix], y_limits=y_limits[ax_ix])
         fig.tight_layout()
         fig.subplots_adjust(bottom=0.25)
+        fig.set_size_inches(3, 6)
 
         if save_image_path: plt.savefig(save_image_path) #, bbox_inches="tight")
         if show_image: plt.show()

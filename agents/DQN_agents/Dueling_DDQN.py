@@ -1,6 +1,6 @@
 import torch
 from torch import optim
-from agents.Base_Agent import Base_Agent
+from ..Base_Agent import Base_Agent
 from .DDQN import DDQN
 
 class Dueling_DDQN(DDQN):

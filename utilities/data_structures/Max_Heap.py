@@ -1,5 +1,5 @@
 import numpy as np
-from utilities.data_structures.Node import Node
+from ..data_structures.Node import Node
 
 class Max_Heap(object):
     """Generic max heap object"""

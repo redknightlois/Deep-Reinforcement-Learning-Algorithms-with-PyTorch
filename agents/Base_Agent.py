@@ -21,7 +21,7 @@ class Base_Agent(object):
         self.set_random_seeds(config.seed)
         self.environment = config.environment
         self.environment_title = self.get_environment_title()
-        self.action_types = "DISCRETE" if self.environment.action_space.dtype == int else "CONTINUOUS"
+        self.action_types = "DISCRETE" if self.environment.action_space.dtype == int or self.environment.action_space.dtype == np.int64 else "CONTINUOUS"
         self.action_size = int(self.get_action_size())
         self.config.action_size = self.action_size
 
@@ -139,7 +139,7 @@ class Base_Agent(object):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
         torch.manual_seed(random_seed)
-        tf.set_random_seed(random_seed)
+        # tf.set_random_seed(random_seed)
         random.seed(random_seed)
         np.random.seed(random_seed)
         if torch.cuda.is_available():
@@ -166,7 +166,7 @@ class Base_Agent(object):
         self.episode_achieved_goals = []
         self.episode_observations = []
         if "exploration_strategy" in self.__dict__.keys(): self.exploration_strategy.reset()
-        self.logger.info("Reseting game -- New start state {}".format(self.state))
+        #self.logger.info("Reseting game -- New start state {}".format(self.state))
 
     def track_episodes_data(self):
         """Saves the data from the recent episodes"""
@@ -219,8 +219,8 @@ class Base_Agent(object):
     def print_rolling_result(self):
         """Prints out the latest episode results"""
         text = """"\r Episode {0}, Score: {3: .2f}, Max score seen: {4: .2f}, Rolling score: {1: .2f}, Max rolling score seen: {2: .2f}"""
-        sys.stdout.write(text.format(len(self.game_full_episode_scores), self.rolling_results[-1], self.max_rolling_score_seen,
-                                     self.game_full_episode_scores[-1], self.max_episode_score_seen))
+        sys.stdout.write(text.format(self.episode_number, self.rolling_results[-1], self.max_rolling_score_seen,
+                                     self.total_episode_score_so_far, self.max_episode_score_seen))
         sys.stdout.flush()
 
     def show_whether_achieved_goal(self):
@@ -276,7 +276,7 @@ class Base_Agent(object):
         if not isinstance(network, list): network = [network]
         optimizer.zero_grad() #reset gradients to 0
         loss.backward(retain_graph=retain_graph) #this calculates the gradients
-        self.logger.info("Loss -- {}".format(loss.item()))
+        #self.logger.info("Loss -- {}".format(loss.item()))
         if self.debug_mode: self.log_gradient_and_weight_information(network, optimizer)
         if clipping_norm is not None:
             for net in network:

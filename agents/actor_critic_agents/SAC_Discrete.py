@@ -2,10 +2,10 @@ import torch
 from torch.optim import Adam
 import torch.nn.functional as F
 import numpy as np
-from agents.Base_Agent import Base_Agent
-from utilities.data_structures.Replay_Buffer import Replay_Buffer
+from ..Base_Agent import Base_Agent
+from ...utilities.data_structures.Replay_Buffer import Replay_Buffer
 from .SAC import SAC
-from utilities.Utility_Functions import create_actor_distribution
+from ...utilities.Utility_Functions import create_actor_distribution
 
 class SAC_Discrete(SAC):
     """The Soft Actor Critic for discrete actions. It inherits from SAC for continuous actions and only changes a few
@@ -17,16 +17,11 @@ class SAC_Discrete(SAC):
         assert self.config.hyperparameters["Actor"]["final_layer_activation"] == "Softmax", "Final actor layer must be softmax"
         self.hyperparameters = config.hyperparameters
         self.critic_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size, key_to_use="Critic")
-        self.critic_local_2 = self.create_NN(input_dim=self.state_size, output_dim=self.action_size,
-                                           key_to_use="Critic", override_seed=self.config.seed + 1)
-        self.critic_optimizer = torch.optim.Adam(self.critic_local.parameters(),
-                                                 lr=self.hyperparameters["Critic"]["learning_rate"])
-        self.critic_optimizer_2 = torch.optim.Adam(self.critic_local_2.parameters(),
-                                                   lr=self.hyperparameters["Critic"]["learning_rate"])
-        self.critic_target = self.create_NN(input_dim=self.state_size, output_dim=self.action_size,
-                                           key_to_use="Critic")
-        self.critic_target_2 = self.create_NN(input_dim=self.state_size, output_dim=self.action_size,
-                                            key_to_use="Critic")
+        self.critic_local_2 = self.create_NN(input_dim=self.state_size, output_dim=self.action_size, key_to_use="Critic", override_seed=self.config.seed + 1)
+        self.critic_optimizer = torch.optim.Adam(self.critic_local.parameters(), lr=self.hyperparameters["Critic"]["learning_rate"])
+        self.critic_optimizer_2 = torch.optim.Adam(self.critic_local_2.parameters(), lr=self.hyperparameters["Critic"]["learning_rate"])
+        self.critic_target = self.create_NN(input_dim=self.state_size, output_dim=self.action_size, key_to_use="Critic")
+        self.critic_target_2 = self.create_NN(input_dim=self.state_size, output_dim=self.action_size, key_to_use="Critic")
         Base_Agent.copy_model_over(self.critic_local, self.critic_target)
         Base_Agent.copy_model_over(self.critic_local_2, self.critic_target_2)
         self.memory = Replay_Buffer(self.hyperparameters["Critic"]["buffer_size"], self.hyperparameters["batch_size"],
@@ -54,7 +49,7 @@ class SAC_Discrete(SAC):
         action_probabilities = self.actor_local(state)
         max_probability_action = torch.argmax(action_probabilities).unsqueeze(0)
         action_distribution = create_actor_distribution(self.action_types, action_probabilities, self.action_size)
-        action = action_distribution.sample().cpu()
+        action = action_distribution.sample()
         # Have to deal with situation of 0.0 probabilities because we can't do log 0
         z = action_probabilities == 0.0
         z = z.float() * 1e-8
@@ -90,3 +85,6 @@ class SAC_Discrete(SAC):
         policy_loss = policy_loss.mean()
         log_action_probabilities = torch.sum(log_action_probabilities * action_probabilities, dim=1)
         return policy_loss, log_action_probabilities
+
+
+
