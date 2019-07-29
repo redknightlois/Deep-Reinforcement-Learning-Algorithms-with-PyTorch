@@ -12,11 +12,13 @@ LOG_SIG_MIN = -20
 TRAINING_EPISODES_PER_EVAL_EPISODE = 10
 EPSILON = 1e-6
 
+
 class SAC(Base_Agent):
     """Soft Actor-Critic model based on the 2018 paper https://arxiv.org/abs/1812.05905 and on this github implementation
       https://github.com/pranz24/pytorch-soft-actor-critic. It is an actor-critic algorithm where the agent is also trained
       to maximise the entropy of their actions as well as their cumulative reward"""
     agent_name = "SAC"
+
     def __init__(self, config):
         Base_Agent.__init__(self, config)
         assert self.action_types == "CONTINUOUS", "Action types must be continuous. Use SAC Discrete instead for discrete actions"
@@ -208,6 +210,16 @@ class SAC(Base_Agent):
 
     def locally_save_policy(self):
         """Saves the policy"""
-        torch.save(self.actor_local.state_dict(), "Models/{}_critic_local_network.pt".format(self.agent_name))
+        torch.save(self.actor_local.state_dict(), "Models/{}_actor_local_network.pt".format(self.agent_name))
         torch.save(self.critic_local.state_dict(), "Models/{}_critic_local_network.pt".format(self.agent_name))
         torch.save(self.critic_local_2.state_dict(), "Models/{}_critic_local_2_network.pt".format(self.agent_name))
+
+    def load_policy(self):
+        actor_local_state = torch.load("Models/{}_actor_local_network.pt".format(self.agent_name))
+        critic_local_state = torch.load("Models/{}_critic_local_network.pt".format(self.agent_name))
+        critic_local_2_state = torch.load("Models/{}_critic_local_2_network.pt".format(self.agent_name))
+
+        self.actor_local.load_state_dict(actor_local_state)
+        self.critic_local.load_state_dict(critic_local_state)
+        self.critic_local_2.load_state_dict(critic_local_2_state)
+
